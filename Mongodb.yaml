@@ -7,14 +7,6 @@
       src: mongo.repo
       dest: /etc/yum.repos.d/mongo.repo
 
-  - name: disable problematic repos
-    ansible.builtin.command: yum config-manager --disable rhel-9-appstream-rhui-rpms
-    ignore_errors: yes
-
-  - name: disable baseos repo
-    ansible.builtin.command: yum config-manager --disable rhel-9-baseos-rhui-rpms
-    ignore_errors: yes
-
   - name: install mongodb server
     ansible.builtin.package:
       name: mongodb-org
