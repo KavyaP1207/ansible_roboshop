@@ -7,6 +7,9 @@
       src: mongo.repo
       dest: /etc/yum.repos.d/mongo.repo
 
+  - name: update yum cache 
+    ansible.builtin.command: yum clean all
+
   - name: install mongodb server
     ansible.builtin.package:
       name: mongodb-org
