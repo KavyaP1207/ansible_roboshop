@@ -9,14 +9,14 @@
 
   - name: install mongodb server
     ansible.builtin.package:
-      name: mongodb
+      name: mongodb-org
       state: present
 
   - name: allow remote connection
     ansible.builtin.replace:
       path: /etc/mongod.conf
-      regexp: 127.0.0.1
-      replace: 0.0.0.0
+      regexp: '127.0.0.1'
+      replace: '0.0.0.0'
 
   - name: start the services and enabled
     ansible.builtin.service:
