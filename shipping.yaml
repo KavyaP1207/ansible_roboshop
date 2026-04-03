@@ -67,7 +67,7 @@
       state: import
       name: all
       login_host: mysql.daws88s.sbs
-      login-user: root
+      login_user: root
       login_password: RoboShop@1
       target: "{{ item }}"
     loop:
