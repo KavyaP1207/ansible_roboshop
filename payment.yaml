@@ -41,11 +41,12 @@
       remote_src: yes
 
   - name: install dependencies
-    ansible.builtin.pip3: 
+    ansible.builtin.pip: 
       requirements: requirements.txt
       executable: 3.9
     args:
       chdir: /app 
+
   - name: copy the payment service
     ansible.builtin.copy:
       src: payment.service
