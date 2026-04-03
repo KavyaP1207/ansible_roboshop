@@ -38,8 +38,6 @@
       path: /etc/nginx/nginx.conf
       state: absent
       
-
-
   - name: copy nginx conf
     ansible.builtin.copy:
       src: nginx.conf
