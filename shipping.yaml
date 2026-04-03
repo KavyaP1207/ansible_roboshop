@@ -7,9 +7,13 @@
       name: "{{ item }}"
       state: present
     loop:
-    - java-17-openjdk
     - maven
     - mysql
+
+  - name: install mysql python libraries
+    ansible.builtin.pip:
+      executable: pip3.9
+      name: PyMySql
 
   - name: create roboshop system user 
     ansible.builtin.user:
