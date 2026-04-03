@@ -54,9 +54,20 @@
      mongosh mongodb.daws88s.sbs --quiet --eval "db.getMongo().getDBNames().indexOf('catalogue')"
     register: catalogue_output
 
-  - name: print the catalogue output
-    ansible.builtin.debug:
-      msg: "{{ catalogue_output }}"
+  # - name: print the catalogue output
+  #   ansible.builtin.debug:
+  #     msg: "{{ catalogue_output }}"
+
+  - name: load products into mongodb
+    ansible.builtin.shell: mongosh --host mongodb.daws88s.sbs </app/db/master-data.js
+    when: catalogue_output.stdout | int < 0
+
+  - name: start the services and enabled
+    ansible.builtin.service:
+      name: catalogue
+      enabled: yes
+      state: started
+      
 
 
 
