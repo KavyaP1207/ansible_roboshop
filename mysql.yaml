@@ -7,32 +7,31 @@
 
   tasks:
 
-    #Install MySQL
+    # 🔹 Install MySQL
     - name: install mysql server
       ansible.builtin.package:
         name: mysql-server
         state: present
 
-    #Start MySQL
+    # 🔹 Start MySQL
     - name: start and enable mysql
       ansible.builtin.service:
         name: mysqld
         state: started
         enabled: yes
 
-    # Install PyMySQL (required for Ansible MySQL modules)
+    # 🔹 Install dependency
     - name: install pymysql
       ansible.builtin.package:
         name: python3-PyMySQL
         state: present
 
-    #  Set root password (FINAL FIX - works always)
-    - name: set root password manually
+    # 🔥 Set root password safely
+    - name: set root password
       ansible.builtin.shell: |
-        mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ mysql_root_password }}';"
-      ignore_errors: yes
+        mysqladmin -u root password "{{ mysql_root_password }}" || true
 
-    #Allow root remote access
+    # 🔹 Allow remote root access
     - name: allow root remote access
       community.mysql.mysql_user:
         name: root
@@ -43,7 +42,7 @@
         login_user: root
         login_password: "{{ mysql_root_password }}"
 
-    #Remove anonymous users
+    # 🔹 Remove anonymous users
     - name: remove anonymous users
       community.mysql.mysql_user:
         name: ''
@@ -52,7 +51,7 @@
         login_user: root
         login_password: "{{ mysql_root_password }}"
 
-    # Remove test DB
+    # 🔹 Remove test DB
     - name: remove test database
       community.mysql.mysql_db:
         name: test
@@ -60,19 +59,24 @@
         login_user: root
         login_password: "{{ mysql_root_password }}"
 
-    # Install git
+    # 🔹 Install git
     - name: install git
       ansible.builtin.package:
         name: git
         state: present
 
-    #Clone schema repo
+    # 🔹 Clone schema repo
     - name: clone mysql repo
       ansible.builtin.git:
         repo: https://github.com/roboshop-devops-project/mysql.git
         dest: /tmp/mysql
 
-    #Load shipping schema
+    # 🔥 Fix MySQL 8 incompatible syntax
+    - name: fix schema for mysql 8
+      ansible.builtin.shell: |
+        sed -i 's/IDENTIFIED BY/# IDENTIFIED BY/g' /tmp/mysql/shipping.sql
+
+    # 🔹 Load schema
     - name: load shipping schema
       ansible.builtin.shell: |
         mysql -h localhost -uroot -p{{ mysql_root_password }} < /tmp/mysql/shipping.sql
