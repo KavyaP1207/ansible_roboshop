@@ -1,108 +1,17 @@
 - name: setup mysql server
   hosts: mysql
   become: yes
-
-  vars:
-    mysql_root_password: RoboShop@1
-
   tasks:
+  - name: install mysql server
+    ansible.builtin.package:
+      name: mysql-server
+      state: present
 
-    # 🔹 Install MySQL
-    - name: install mysql server
-      ansible.builtin.package:
-        name: mysql-server
-        state: present
+  - name: start and enable mysql server
+    ansible.builtin.service:
+      name: mysqld
+      state: started
+      enabled: yes
 
-    # 🔹 Start MySQL
-    - name: start and enable mysql
-      ansible.builtin.service:
-        name: mysqld
-        state: started
-        enabled: yes
-
-    # 🔹 Install dependency
-    - name: install pymysql
-      ansible.builtin.package:
-        name: python3-PyMySQL
-        state: present
-
-    # 🔥 Set root password safely
-    - name: set root password
-      ansible.builtin.shell: |
-        mysqladmin -u root password "{{ mysql_root_password }}" || true
-
-    # 🔹 Allow root remote access
-    - name: allow root remote access
-      community.mysql.mysql_user:
-        name: root
-        host: "%"
-        password: "{{ mysql_root_password }}"
-        priv: "*.*:ALL,GRANT"
-        state: present
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-
-    # 🔹 Remove anonymous users
-    - name: remove anonymous users
-      community.mysql.mysql_user:
-        name: ''
-        host_all: yes
-        state: absent
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-
-    # 🔹 Remove test DB
-    - name: remove test database
-      community.mysql.mysql_db:
-        name: test
-        state: absent
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-
-    # 🔹 Install git
-    - name: install git
-      ansible.builtin.package:
-        name: git
-        state: present
-    - name: remove old mysql repo
-      ansible.builtin.file:
-        path: /tmp/mysql
-        state: absent
-
-    - name: clone mysql repo
-      ansible.builtin.git:
-        repo: https://github.com/roboshop-devops-project/mysql.git
-        dest: /tmp/mysql
-
-    # 🔥 FIX MySQL 8 incompatible schema
-    - name: clean mysql 8 incompatible lines
-      ansible.builtin.shell: |
-        sed -i '/IDENTIFIED BY/d' /tmp/mysql/shipping.sql
-        sed -i '/GRANT ALL/d' /tmp/mysql/shipping.sql
-        sed -i '/CREATE USER/d' /tmp/mysql/shipping.sql
-
-    # 🔹 Create DB
-    - name: create cities database
-      community.mysql.mysql_db:
-        name: cities
-        state: present
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-
-    # 🔹 Create user properly
-    - name: create shipping user
-      community.mysql.mysql_user:
-        name: shipping
-        host: "%"
-        password: secret
-        priv: "cities.*:ALL"
-        state: present
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-
-    # 🔹 Load schema
-    - name: load shipping schema
-      ansible.builtin.shell: |
-        mysql -h localhost -uroot -p{{ mysql_root_password }} < /tmp/mysql/shipping.sql
-      args:
-        executable: /bin/bash
+  - name: setup root password
+    ansible.builtin.command: mysql_secure_installation --set-root-pass RoboShop@1
