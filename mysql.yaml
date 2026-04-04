@@ -1,17 +1,67 @@
 - name: setup mysql server
   hosts: mysql
   become: yes
+  vars:
+    mysql_root_password: RoboShop@1
+
   tasks:
-  - name: install mysql server
-    ansible.builtin.package:
-      name: mysql-server
-      state: present
 
-  - name: start and enable mysql server
-    ansible.builtin.service:
-      name: mysqld
-      state: started
-      enabled: yes
+    # 🔹 Install MySQL
+    - name: install mysql server
+      ansible.builtin.package:
+        name: mysql-server
+        state: present
 
-  - name: setup root password
-    ansible.builtin.command: mysql_secure_installation --set-root-pass RoboShop@1
+    # 🔹 Start MySQL
+    - name: start and enable mysql
+      ansible.builtin.service:
+        name: mysqld
+        state: started
+        enabled: yes
+
+    # 🔹 Install python MySQL dependency (VERY IMPORTANT)
+    - name: install pymysql
+      ansible.builtin.package:
+        name: python3-PyMySQL
+        state: present
+
+    # 🔹 Set root password properly
+    - name: set root password
+      community.mysql.mysql_user:
+        name: root
+        host: "%"
+        password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/lib/mysql/mysql.sock
+        priv: "*.*:ALL,GRANT"
+        state: present
+
+    # 🔹 Remove anonymous users (good practice)
+    - name: remove anonymous users
+      community.mysql.mysql_user:
+        name: ''
+        host_all: yes
+        state: absent
+
+    # 🔹 Remove test DB
+    - name: remove test database
+      community.mysql.mysql_db:
+        name: test
+        state: absent
+
+    # 🔹 Download schema repo
+    - name: install git
+      ansible.builtin.package:
+        name: git
+        state: present
+
+    - name: clone mysql repo
+      ansible.builtin.git:
+        repo: https://github.com/roboshop-devops-project/mysql.git
+        dest: /tmp/mysql
+
+    # 🔹 Load schema (shipping DB)
+    - name: load shipping schema
+      ansible.builtin.shell: |
+        mysql -uroot -p{{ mysql_root_password }} < /tmp/mysql/shipping.sql
+      args:
+        executable: /bin/bash
