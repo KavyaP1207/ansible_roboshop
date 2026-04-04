@@ -46,8 +46,6 @@
       path: /tmp/catalogue.zip
       state: absent
  
- 
-  
   - name: install dependies
     community.general.npm:
       path: /app
