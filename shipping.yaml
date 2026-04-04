@@ -40,7 +40,7 @@
     ansible.builtin.file:
       path: /tmp/catalogue.zip
       state: absent
-      
+
   - name: install shipping
     ansible.builtin.get_url:
       url: https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip
