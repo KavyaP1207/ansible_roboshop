@@ -78,20 +78,6 @@
     ansible.builtin.shell: mongosh --host mongodb.daws88s.sbs </app/db/master-data.js
     when: catalogue_output.stdout | int < 0
 
-
-  # - name: evaluate catalogue database
-  #   community.mongodb.mongodb_shell:
-  #     login_host: mongodb.daws88s.sbs
-  #     eval: db.getMongo().getDBNames().indexOf('catalogue')
-  #     register: catalogue_output
-
-  # - name: start the services and enabled
-  #   ansible.builtin.service:
-  #     name: catalogue
-  #     enabled: yes
-  #     state: started
-
-
   - name: daemon reload and enable start the server
     ansible.builtin.systemd_service:
       name: catalogue
