@@ -6,11 +6,11 @@
     sg_id: sg-063ff765de26714d5
     zone_id: Z012055134XPX8JBK0O0E
     domain_name: daws88s.sbs
-    # instances:
-    # - mongodb
-    # - redis
-    # - mysql
-    # - rabbitmq
+    instances:
+    - mongodb
+    - redis
+    - mysql
+    - rabbitmq
   tasks:
   - name: create ec2 instance
     amazon.aws.ec2_instance:
