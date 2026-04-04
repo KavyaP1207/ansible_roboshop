@@ -31,7 +31,7 @@
       ansible.builtin.shell: |
         mysqladmin -u root password "{{ mysql_root_password }}" || true
 
-    # 🔹 Allow remote root access
+    # 🔹 Allow root remote access
     - name: allow root remote access
       community.mysql.mysql_user:
         name: root
@@ -71,10 +71,31 @@
         repo: https://github.com/roboshop-devops-project/mysql.git
         dest: /tmp/mysql
 
-    # 🔥 Fix MySQL 8 incompatible syntax
-    - name: fix schema for mysql 8
+    # 🔥 FIX MySQL 8 incompatible schema
+    - name: clean mysql 8 incompatible lines
       ansible.builtin.shell: |
-        sed -i 's/IDENTIFIED BY/# IDENTIFIED BY/g' /tmp/mysql/shipping.sql
+        sed -i '/IDENTIFIED BY/d' /tmp/mysql/shipping.sql
+        sed -i '/GRANT ALL/d' /tmp/mysql/shipping.sql
+        sed -i '/CREATE USER/d' /tmp/mysql/shipping.sql
+
+    # 🔹 Create DB
+    - name: create cities database
+      community.mysql.mysql_db:
+        name: cities
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+
+    # 🔹 Create user properly
+    - name: create shipping user
+      community.mysql.mysql_user:
+        name: shipping
+        host: "%"
+        password: secret
+        priv: "cities.*:ALL"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
 
     # 🔹 Load schema
     - name: load shipping schema
