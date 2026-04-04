@@ -64,8 +64,11 @@
       ansible.builtin.package:
         name: git
         state: present
+    - name: remove old mysql repo
+      ansible.builtin.file:
+        path: /tmp/mysql
+        state: absent
 
-    # 🔹 Clone schema repo
     - name: clone mysql repo
       ansible.builtin.git:
         repo: https://github.com/roboshop-devops-project/mysql.git
